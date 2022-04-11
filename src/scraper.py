@@ -21,6 +21,8 @@ class Scraper:
 
     def get_links(self, html):
         bs = BeautifulSoup(html, 'html.parser')
+
+        #Cogemos los divs con este class ya que son los que tienen los links que deseamos obtener (links de menú)
         divs = bs.select(".cize-custommenu")
 
         all_Tags = []
@@ -59,7 +61,7 @@ class Scraper:
             # Recogemos las capacidades del item si existen
             capacity = bs.find("p", class_="cap-variation")
 
-            # No todos los links disponen de la capacity del producto
+            # No todos los links disponen de la capacity del producto, si no disponemos dejamos el atributo vacío
             if capacity is not None:
                 capacity_txt = capacity.text.strip()
             else:
@@ -70,13 +72,19 @@ class Scraper:
 
             # Cogemos categorías
             span_cat = bs.select_one(".posted_in")
-            categories = span_cat.select("a")
+
+            # No todos los links disponen de la categoria del producto, si no disponemos dejamos el atributo vacío
+            if span_cat is not None:
+                categories = span_cat.select("a")
+            else:
+                categories = []
+
             category = [category.text.strip() for category in categories]
 
             # Añadimos un item a la lista de items
             self.items.append(Item(product.text.strip(), orig_price, dte_price, img["data-src"], capacity_txt, dte_percentage, category))
 
-    def scrape_category(self, html, link):
+    def scrape_category(self, link):
 
         category = Category(link.text.strip(), link['href'], [])
 
@@ -99,26 +107,29 @@ class Scraper:
 
         tag_links = self.get_links(html)
 
+        # Bucle que procesa por cada categoría, todos los productos de cada una de ellas
         for link in tag_links:
             print("A link was found: " + link['href'] + " - Scrapping link data...")
 
             # r = requests.get(link['href'])
             # self.save_html(r.content, "docs/" + link['href'].split("/")[-2])
 
-            html = self.open_html("docs/" + link['href'].split("/")[-2])
-            self.scrape_category(html, link)
+            self.scrape_category(link)
 
         filename = "data.csv"
         with open(filename, "w", encoding="utf-8") as file:
+            # Añadimos la cabecera de las variables que añadiremos al csv
             file.write("Name" + "," + "Price" + "," + "Discount Price" + "," + "Product link" + "," + "Capacity" + "," + "Discount Percentage" + "," + "Categories")
             file.write("\n")
 
+            # Para cada uno de nuestros items, escribimos su correspondiente linea en el csv
             for item in self.items:
                 category_txt = ""
                 for c in item.categories:
                     category_txt = c + "-" + category_txt
 
+                print("Writing " + item.name + " in " + filename)
                 file.write(
-                    item.name + "," + item.price + "," + item.discount_price + "," + item.link + "," + item.capacity + "," + item.categories)
+                    item.name + "," + item.price + "," + item.discount_price + "," + item.link + "," + item.capacity + "," + category_txt)
                 file.write("\n")
 
