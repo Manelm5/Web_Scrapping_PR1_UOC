@@ -28,3 +28,6 @@ Scraping the Data.
 Automated Data Collection with R: A Practical Guide to Web Scraping and Text
 Mining. John Wiley & Sons.
 9. Tutorial de Github https://guides.github.com/activities/hello-world.![img_1.png](img_1.png)
+
+## DOI Zenodo
+10.5281/zenodo.6450277
