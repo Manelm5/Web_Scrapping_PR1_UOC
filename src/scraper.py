@@ -98,8 +98,8 @@ class Scraper:
 
     def scrape(self, url):
 
-        # r = requests.get(url)
-        # self.save_html(r.content, "docs/tecnomari")
+        r = requests.get(url)
+        self.save_html(r.content, "docs/tecnomari")
 
         html = self.open_html("docs/tecnomari")
 
@@ -111,8 +111,8 @@ class Scraper:
         for link in tag_links:
             print("A link was found: " + link['href'] + " - Scrapping link data...")
 
-            # r = requests.get(link['href'])
-            # self.save_html(r.content, "docs/" + link['href'].split("/")[-2])
+            r = requests.get(link['href'])
+            self.save_html(r.content, "docs/" + link['href'].split("/")[-2])
 
             self.scrape_category(link)
 
